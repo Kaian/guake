@@ -409,6 +409,12 @@ class PrefsCallbacks(object):
         if os.path.isfile(filename or ''):
             self.client.set_string(KEY('/style/background/image'), filename)
 
+    def on_activity_color_color_set(self, btn):
+        """Changes the value of activity_color in gconf
+        """
+        color = hexify_color(btn.get_color())
+        self.client.set_string(KEY('/style/activity/color'), color)
+
     def on_transparency_value_changed(self, hscale):
         """Changes the value of background_transparency in gconf
         """
@@ -926,6 +932,14 @@ class PrefsDialog(SimpleGladeApp):
         # allow bold font
         value = self.client.get_bool(KEY('/style/font/allow_bold'))
         self.get_widget('allow_bold').set_active(value)
+
+        # activity color
+        value = self.client.get_string(KEY('/style/activity/color'))
+        try:
+            color = gtk.gdk.color_parse(value)
+            self.get_widget('activity_color').set_color(color)
+        except (ValueError, TypeError):
+            warnings.warn('Unable to parse color %s' % val, Warning)
 
         # palette
         self.fill_palette_names()

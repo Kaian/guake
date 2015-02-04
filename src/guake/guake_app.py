@@ -1363,6 +1363,18 @@ class Guake(SimpleGladeApp):
         self.client.notify(KEY('/general/window_height'))
 
     # -- callbacks --
+    def on_terminal_scrolled(self, term, box, bnt):
+        # Dont highlight current tab even when activity is detected
+        if not self.notebook.page_num(box) == self.notebook.current_page():
+            label = bnt.get_children()[0]
+            label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse(
+                        self.client.get_string(KEY('/style/activity/color'))))
+
+    def on_button_clicked(self, term, box, bnt):
+        self.notebook.set_current_page(self.notebook.page_num(box))
+        label =  bnt.get_children()[0]
+        ncolor = getattr(self.window.get_style(), "text")[int(gtk.STATE_NORMAL)]
+        label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(str(ncolor)))
 
     def on_terminal_exited(self, term, widget):
         """When a terminal is closed, shell process should be killed,
@@ -1708,6 +1720,7 @@ class Guake(SimpleGladeApp):
         bnt.connect('clicked', lambda *x: self.notebook.set_current_page(
             self.notebook.page_num(box)
         ))
+        bnt.connect('clicked', self.on_button_clicked, box, bnt)
         if self.selected_color is not None:
             bnt.modify_bg(gtk.STATE_ACTIVE, gtk.gdk.Color(
                 str(self.selected_color)))
@@ -1717,6 +1730,7 @@ class Guake(SimpleGladeApp):
         bnt.drag_source_set(gtk.gdk.BUTTON1_MASK, [drag_drop_type], gtk.gdk.ACTION_MOVE)
         bnt.connect("drag_data_get", self.on_drag_tab)
         bnt.show()
+        box.terminal.connect('cursor-moved', self.on_terminal_scrolled, box, bnt )
 
         self.tabs.pack_start(bnt, expand=False, padding=1)
 
