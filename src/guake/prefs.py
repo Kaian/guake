@@ -226,6 +226,11 @@ class PrefsCallbacks(object):
         """
         self.client.set_bool(KEY('/general/tab_ontop'), chk.get_active())
 
+    def on_hostname_titles_toggled(self, chk):
+        """Changes the activity of hostname_titles in gconf
+        """
+        self.client.set_bool(KEY('/general/hostname_titles'), chk.get_active())
+
     def on_quick_open_enable_toggled(self, chk):
         """Changes the activity of quick_open_enable in gconf
         """
@@ -832,6 +837,10 @@ class PrefsDialog(SimpleGladeApp):
         self.get_widget('max_tab_name_length').set_value(value)
 
         self.update_vte_subwidgets_states()
+
+        # use Hostname titles
+        value = self.client.get_bool(KEY('/general/hostname_titles'))
+        self.get_widget('hostname_titles').set_active(value)
 
         value = self.client.get_float(KEY('/general/window_height_f'))
         if not value:

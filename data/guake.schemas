@@ -438,6 +438,18 @@
         </schema>
 
         <schema>
+            <key>/schemas/apps/guake/general/hostname_titles</key>
+            <applyto>/apps/guake/general/hostname_titles</applyto>
+            <owner>guake</owner>
+            <type>bool</type>
+            <default>true</default>
+            <locale name="C">
+                <short>Use hostname titles for tab naming</short>
+                <long>Similiar to vte titles, when vte terminal has a shell with PROMPT_COMMAND enabled that print its hostname, try to strip it from the title and use it as tab label.</long>
+            </locale>
+        </schema>
+
+        <schema>
             <key>/schemas/apps/guake/style/cursor_blink_mode</key>
             <applyto>/apps/guake/style/cursor_blink_mode</applyto>
             <owner>guake</owner>

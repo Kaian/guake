@@ -37,6 +37,7 @@ import sys
 import traceback
 import uuid
 import xdg.Exceptions
+import re
 
 from urllib import quote_plus
 from urllib import url2pathname
@@ -1132,6 +1133,7 @@ class Guake(SimpleGladeApp):
         self.client.notify(KEY('/general/use_vte_titles'))
         self.client.notify(KEY('/general/abbreviate_tab_names'))
         self.client.notify(KEY('/general/max_tab_name_length'))
+        self.client.notify(KEY('/general/hostname_titles'))
         self.client.notify(KEY('/general/quick_open_enable'))
         self.client.notify(KEY('/general/quick_open_command_line'))
         self.client.notify(KEY('/style/cursor_shape'))
@@ -1420,6 +1422,15 @@ class Guake(SimpleGladeApp):
             pass
         return self._shorten_tab_title(vte_title)
 
+    def hostname_tab_title(self, vte):
+        reg = re.compile(".*@(.*):.*")
+        mgroup = reg.match(vte.get_window_title())
+        if not mgroup:
+            return self._shorten_tab_title(vte_title);
+
+        vte_title = mgroup.group(1) or vte.get_window_title()
+        return self._shorten_tab_title(vte_title);
+
     def _shorten_tab_title(self, text):
         use_vte_titles = self.client.get_bool(KEY("/general/use_vte_titles"))
         if not use_vte_titles:
@@ -1431,13 +1442,17 @@ class Guake(SimpleGladeApp):
 
     def on_terminal_title_changed(self, vte, box):
         use_vte_titles = self.client.get_bool(KEY("/general/use_vte_titles"))
-        if not use_vte_titles:
+        hostname_titles = self.client.get_bool(KEY("/general/hostname_titles"))
+        if not use_vte_titles and not hostname_titles:
             return
         page = self.notebook.page_num(box)
         tab = self.tabs.get_children()[page]
         # if tab has been renamed by user, don't override.
         if not getattr(tab, 'custom_label_set', False):
-            tab.set_label(self.compute_tab_title(vte))
+            if use_vte_titles:
+                tab.set_label(self.compute_tab_title(vte))
+            else:
+                tab.set_label(self.hostname_tab_title(vte))
 
     def on_rename_current_tab_activate(self, *args):
         """Shows a dialog to rename the current tab.
